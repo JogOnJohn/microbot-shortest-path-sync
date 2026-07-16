@@ -21,6 +21,9 @@ The converter uses only the Python standard library. Git and Python 3.10+ are re
 From PowerShell:
 
 ```powershell
+git clone https://github.com/JogOnJohn/microbot-shortest-path-sync.git
+Set-Location microbot-shortest-path-sync
+
 .\sync-shortest-path.ps1 `
   -MicrobotRoot C:\Users\you\IdeaProjects\Microbot
 ```
