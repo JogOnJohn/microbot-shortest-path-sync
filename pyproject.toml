@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "microbot-shortest-path-sync"
+version = "0.1.0"
+description = "Deterministic upstream transport-data synchronizer for Microbot"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Microbot contributors" }
+]
+dependencies = []
+
+[project.scripts]
+microbot-transport-sync = "transport_sync.sync:main"
+
+[tool.setuptools.package-data]
+transport_sync = ["sync_manifest.json", "local_overrides.tsv"]

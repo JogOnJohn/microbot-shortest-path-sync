@@ -1,0 +1,43 @@
+{
+  "tooling_repository": "https://github.com/osrs-pathfinding/shortest-path-tooling.git",
+  "tooling_commit": "86fbe2197c2dd192db33896c7ca47ab5cef14929",
+  "data_repository": "https://github.com/Skretzo/shortest-path.git",
+  "data_commit": "7e7e5bf94bbb155c2454bcdf8c1036dec0fd9a79",
+  "collision_map_sha256": "3e1658cf4bd1ad34832b42c3896df61a7fe6421f96758d046e4a8aa39cbbc40a",
+  "categories": {
+    "agility_shortcuts.tsv": "AGILITY_SHORTCUT",
+    "boats.tsv": "BOAT",
+    "canoes.tsv": "CANOE",
+    "charter_ships.tsv": "CHARTER_SHIP",
+    "fairy_rings.tsv": "FAIRY_RING",
+    "gnome_gliders.tsv": "GNOME_GLIDER",
+    "hot_air_balloons.tsv": "HOT_AIR_BALLOON",
+    "magic_carpets.tsv": "MAGIC_CARPET",
+    "magic_mushtrees.tsv": "MAGIC_MUSHTREE",
+    "minecarts.tsv": "MINECART",
+    "quetzal_whistle.tsv": "TELEPORTATION_ITEM",
+    "quetzals.tsv": "QUETZAL",
+    "seasonal_transports.tsv": "SEASONAL_TRANSPORT",
+    "ships.tsv": "SHIP",
+    "spirit_trees.tsv": "SPIRIT_TREE",
+    "teleportation_boxes.tsv": "TELEPORTATION_PORTAL",
+    "teleportation_items.tsv": "TELEPORTATION_ITEM",
+    "teleportation_levers.tsv": "TELEPORTATION_LEVER",
+    "teleportation_minigames.tsv": "TELEPORTATION_MINIGAME",
+    "teleportation_portals.tsv": "TELEPORTATION_PORTAL",
+    "teleportation_portals_poh.tsv": "TELEPORTATION_PORTAL",
+    "teleportation_spells.tsv": "TELEPORTATION_SPELL",
+    "teleportation_spells_home.tsv": "TELEPORTATION_SPELL",
+    "transports.tsv": "TRANSPORT",
+    "wilderness_obelisks.tsv": "WILDERNESS_OBELISK"
+  },
+  "local_only_resources": [
+    "blocked_edges.tsv",
+    "dangerous_tiles.tsv",
+    "npcs.tsv",
+    "restrictions.tsv"
+  ],
+  "known_unsupported_columns": {
+    "Region override": "League-region availability is not represented by Microbot Transport; retained and reported, never silently discarded."
+  }
+}
