@@ -3,12 +3,18 @@ param(
     [Parameter(Mandatory = $true)]
     [string] $MicrobotRoot,
 
-    [string] $UpstreamRoot = (Join-Path $PSScriptRoot ".upstream\shortest-path-tooling"),
+    [string] $UpstreamRoot,
 
-    [switch] $SkipTests
+    [switch] $SkipTests,
+
+    [switch] $SkipMicrobotValidation
 )
 
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($UpstreamRoot)) {
+    $UpstreamRoot = Join-Path $PSScriptRoot ".upstream\shortest-path-tooling"
+}
 
 function Invoke-Checked {
     param(
@@ -67,8 +73,31 @@ Invoke-Checked python -m transport_sync.sync `
     --output-root $outputRoot `
     --report-root $reportRoot
 
+if (-not $SkipMicrobotValidation) {
+    $gradle = Join-Path $MicrobotRoot "gradlew.bat"
+    if (-not (Test-Path -LiteralPath $gradle -PathType Leaf)) {
+        throw "Microbot Gradle wrapper not found: $gradle"
+    }
+    Push-Location $MicrobotRoot
+    try {
+        Invoke-Checked $gradle :client:validateTransportSync `
+            "-PtransportSyncGeneratedDir=$outputRoot" `
+            --console=plain
+        Invoke-Checked $gradle :client:runUnitTests `
+            --tests net.runelite.client.plugins.microbot.shortestpath.ShortestPathGoldenRouteBaselineTest `
+            --tests net.runelite.client.plugins.microbot.shortestpath.TransportResourceLoadTest `
+            --console=plain
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 $summary = Join-Path $reportRoot "summary.md"
 Write-Host ""
 Write-Host "Transport sync completed."
 Write-Host "Generated resources: $outputRoot"
 Write-Host "Semantic report:    $summary"
+if ($SkipMicrobotValidation) {
+    Write-Warning "Microbot parser and golden-route validation was skipped."
+}

@@ -8,6 +8,7 @@ from transport_sync.sync import (
     apply_overrides,
     identity,
     parse_action,
+    payload_sha256,
     read_tsv,
     semantic_diff,
     write_tsv,
@@ -18,6 +19,16 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class TransportSyncTest(unittest.TestCase):
+    def test_payload_hash_is_filename_sorted_and_content_sensitive(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "b.tsv").write_bytes(b"two")
+            (root / "a.tsv").write_bytes(b"one")
+            first = payload_sha256(root, ["b.tsv", "a.tsv"])
+            self.assertEqual(first, payload_sha256(root, ["a.tsv", "b.tsv"]))
+            (root / "a.tsv").write_bytes(b"changed")
+            self.assertNotEqual(first, payload_sha256(root, ["a.tsv", "b.tsv"]))
+
     def test_parses_multiword_target_and_object_id(self):
         self.assertEqual(("Open", "Tree Gnome Gate", "190"), parse_action("Open Tree Gnome Gate 190"))
 

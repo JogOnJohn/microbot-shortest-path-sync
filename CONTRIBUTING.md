@@ -8,11 +8,14 @@ Before submitting a change:
 python -m unittest discover -s tests -p "test_*.py"
 ```
 
-For a real sync, also run the tool against a Microbot checkout and review both generated reports.
-Changes that affect generated transport resources should then pass Microbot's:
+For a real sync, run the wrapper against a Microbot checkout and review both generated reports. The
+wrapper automatically passes its fresh staging directory to Microbot's parser/collision validator,
+then runs the golden-route and resource-load tests. The equivalent manual commands are:
 
 ```powershell
-.\gradlew.bat :client:validateTransportSync --console=plain
+.\gradlew.bat :client:validateTransportSync `
+  -PtransportSyncGeneratedDir=C:\path\to\microbot-shortest-path-sync\build\transport-sync\generated `
+  --console=plain
 .\gradlew.bat :client:runUnitTests `
   --tests net.runelite.client.plugins.microbot.shortestpath.ShortestPathGoldenRouteBaselineTest `
   --tests net.runelite.client.plugins.microbot.shortestpath.TransportResourceLoadTest `

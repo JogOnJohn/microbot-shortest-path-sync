@@ -41,8 +41,10 @@ The wrapper:
 1. clones or refreshes the pinned upstream tooling checkout under `.upstream/`;
 2. checks out the exact tooling and data commits from `transport_sync/sync_manifest.json`;
 3. runs the Python tests;
-4. generates normalized resources;
-5. writes a semantic report.
+4. generates normalized resources plus a hash-pinned provenance record;
+5. writes a semantic report;
+6. validates that exact staging payload with Microbot's Java parser, paired collision map, local-only
+   resource checks, golden routes, and resource loader.
 
 Review:
 
@@ -80,15 +82,15 @@ microbot-transport-sync --help
 1. Fetch the tooling and data repositories.
 2. Review upstream commits and changed files.
 3. Update the pinned commits in `transport_sync/sync_manifest.json`.
-4. If the paired collision archive changed, update its SHA-256 only when the Microbot baseline
-   intentionally adopts that archive.
+4. Update the paired collision archive SHA-256 from the same pinned data commit; the converter stages
+   and fingerprints that archive atomically with the transport catalog.
 5. Run the wrapper and review the semantic report.
 6. Preserve Microbot-specific fixes in `transport_sync/local_overrides.tsv`.
 7. Validate staged resources with Microbot's real Java parser and golden-route tests before
    copying anything into a release branch.
 
-This repository owns conversion and reporting. Microbot owns runtime parser validation, collision
-endpoint ratchets, route tests, and final resource adoption.
+This repository owns conversion, provenance, and orchestration. Microbot owns runtime parser validation,
+collision endpoint ratchets, local-only resource validation, route tests, and final resource adoption.
 
 See [docs/TRANSPORT_SCHEMA.md](docs/TRANSPORT_SCHEMA.md) for the currently supported Microbot
 transport contract, upstream column mapping, and execution-sensitive semantics.

@@ -160,7 +160,7 @@ def git_head(path: Path) -> str:
     return result.stdout.strip()
 
 
-def locate_upstream(tooling_root: Path, manifest: dict) -> Path:
+def locate_upstream(tooling_root: Path, manifest: dict) -> tuple[Path, Path]:
     expected_tooling = manifest["tooling_commit"]
     actual_tooling = git_head(tooling_root)
     if actual_tooling != expected_tooling:
@@ -175,7 +175,24 @@ def locate_upstream(tooling_root: Path, manifest: dict) -> Path:
     resources = data_root / "src/main/resources/transports"
     if not resources.is_dir():
         raise SyncError(f"Transport resources not found: {resources}")
-    return resources
+    collision_map = data_root / "src/main/resources/collision-map.zip"
+    if not collision_map.is_file():
+        raise SyncError(f"Collision map not found: {collision_map}")
+    return resources, collision_map
+
+
+def payload_sha256(root: Path, filenames: Iterable[str]) -> str:
+    """Hash staged payload names and bytes deterministically, excluding provenance itself."""
+    digest = hashlib.sha256()
+    for filename in sorted(filenames):
+        path = root / filename
+        if not path.is_file():
+            raise SyncError(f"Missing staged payload: {path}")
+        digest.update(filename.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def validate_headers(
@@ -442,6 +459,8 @@ def write_summary(
     overrides: list[dict[str, object]],
     unsupported: list[dict[str, object]],
     parser_inert: list[dict[str, object]],
+    baseline_collision_hash: str,
+    candidate_collision_hash: str,
 ) -> None:
     summary = diff["summary"]
     lines = [
@@ -449,7 +468,9 @@ def write_summary(
         "",
         f"- Tooling commit: `{manifest['tooling_commit']}`",
         f"- Data commit: `{manifest['data_commit']}`",
-        f"- Paired collision map SHA-256: `{manifest['collision_map_sha256']}`",
+        f"- Baseline collision map SHA-256: `{baseline_collision_hash}`",
+        f"- Candidate collision map SHA-256: `{candidate_collision_hash}`",
+        f"- Collision map changed: **{baseline_collision_hash != candidate_collision_hash}**",
         f"- Overrides applied: **{len(overrides)}**",
         f"- Added transports: **{summary['added']}**",
         f"- Removed transports: **{summary['removed']}**",
@@ -501,17 +522,20 @@ def write_summary(
 
 def run(args: argparse.Namespace) -> int:
     manifest = json.loads((SCRIPT_DIR / "sync_manifest.json").read_text(encoding="utf-8"))
-    upstream_resources = locate_upstream(args.upstream_root.resolve(), manifest)
+    upstream_resources, upstream_collision_path = locate_upstream(
+        args.upstream_root.resolve(), manifest
+    )
+    candidate_collision_hash = hashlib.sha256(upstream_collision_path.read_bytes()).hexdigest()
+    if candidate_collision_hash != manifest["collision_map_sha256"]:
+        raise SyncError(
+            f"Pinned upstream collision map hash is {candidate_collision_hash}; expected "
+            f"{manifest['collision_map_sha256']}"
+        )
     baseline_root = args.baseline_root.resolve()
     collision_path = baseline_root / "collision-map.zip"
     if not collision_path.is_file():
-        raise SyncError(f"Missing paired collision map: {collision_path}")
-    collision_hash = hashlib.sha256(collision_path.read_bytes()).hexdigest()
-    if collision_hash != manifest["collision_map_sha256"]:
-        raise SyncError(
-            f"Collision map hash is {collision_hash}; expected paired "
-            f"{manifest['collision_map_sha256']}"
-        )
+        raise SyncError(f"Missing baseline collision map: {collision_path}")
+    baseline_collision_hash = hashlib.sha256(collision_path.read_bytes()).hexdigest()
     output_root = args.output_root.resolve()
     report_root = args.report_root.resolve()
     categories: dict[str, str] = manifest["categories"]
@@ -574,13 +598,36 @@ def run(args: argparse.Namespace) -> int:
         if not source.is_file():
             raise SyncError(f"Missing local-only resource: {source}")
         shutil.copy2(source, output_root / filename)
+    shutil.copy2(upstream_collision_path, output_root / "collision-map.zip")
+
+    payload_files = list(categories) + list(manifest["local_only_resources"]) + ["collision-map.zip"]
+    generated_payload_hash = payload_sha256(output_root, payload_files)
+    manifest_hash = hashlib.sha256(
+        (SCRIPT_DIR / "sync_manifest.json").read_bytes()
+    ).hexdigest()
+    provenance = {
+        "tooling_commit": manifest["tooling_commit"],
+        "data_commit": manifest["data_commit"],
+        "manifest_sha256": manifest_hash,
+        "baseline_collision_map_sha256": baseline_collision_hash,
+        "candidate_collision_map_sha256": candidate_collision_hash,
+        "generated_payload_sha256": generated_payload_hash,
+    }
+    (output_root / "sync-provenance.properties").write_text(
+        "".join(f"{key}={value}\n" for key, value in provenance.items()),
+        encoding="utf-8",
+    )
 
     diff = semantic_diff(baseline_root, tables, categories)
     report_root.mkdir(parents=True, exist_ok=True)
     report = {
         "tooling_commit": manifest["tooling_commit"],
         "data_commit": manifest["data_commit"],
-        "collision_map_sha256": collision_hash,
+        "collision_map_sha256": candidate_collision_hash,
+        "baseline_collision_map_sha256": baseline_collision_hash,
+        "candidate_collision_map_sha256": candidate_collision_hash,
+        "collision_map_changed": baseline_collision_hash != candidate_collision_hash,
+        "generated_payload_sha256": generated_payload_hash,
         "overrides": overrides,
         "known_unsupported": unsupported,
         "upstream_parser_inert_interactions": upstream_parser_inert,
@@ -591,7 +638,8 @@ def run(args: argparse.Namespace) -> int:
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     write_summary(
-        report_root / "summary.md", manifest, diff, overrides, unsupported, parser_inert
+        report_root / "summary.md", manifest, diff, overrides, unsupported, parser_inert,
+        baseline_collision_hash, candidate_collision_hash
     )
     print(json.dumps(diff["summary"], sort_keys=True))
     return 0
