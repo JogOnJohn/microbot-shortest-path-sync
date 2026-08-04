@@ -11,6 +11,7 @@ from transport_sync.sync import (
     payload_sha256,
     read_tsv,
     semantic_diff,
+    semantic_map,
     write_tsv,
 )
 
@@ -31,6 +32,29 @@ class TransportSyncTest(unittest.TestCase):
 
     def test_parses_multiword_target_and_object_id(self):
         self.assertEqual(("Open", "Tree Gnome Gate", "190"), parse_action("Open Tree Gnome Gate 190"))
+
+    def test_semantic_map_coalesces_identical_duplicate_rows(self):
+        row = {
+            "Origin": "3081 3421 0",
+            "Destination": "1859 5243 0",
+            "menuOption menuTarget objectID": "Climb-down;Entrance;20790",
+            "Duration": "",
+        }
+        table = Table(list(row), [row, dict(row)])
+
+        self.assertEqual(1, len(semantic_map("transports.tsv", table)))
+
+    def test_semantic_map_rejects_conflicting_duplicate_rows(self):
+        first = {
+            "Origin": "3081 3421 0",
+            "Destination": "1859 5243 0",
+            "menuOption menuTarget objectID": "Climb-down;Entrance;20790",
+            "Duration": "1",
+        }
+        second = dict(first, Duration="2")
+
+        with self.assertRaisesRegex(SyncError, "conflicting duplicate semantic row"):
+            semantic_map("transports.tsv", Table(list(first), [first, second]))
 
     def test_applies_duration_override_without_mutating_other_fields(self):
         table = read_tsv(FIXTURES / "upstream" / "transports.tsv")

@@ -11,6 +11,7 @@ The tool is intentionally conservative:
 - generated files are staged under `build/`, not copied into Microbot;
 - local behavior fixes are applied last through a versioned override table;
 - unknown categories or columns fail loudly;
+- byte-identical semantic duplicates are coalesced in reports, while conflicting duplicates fail loudly;
 - reports compare parsed transport semantics rather than text lines;
 - duration, requirement, adjacency, endpoint, and handler-sensitive changes are called out.
 

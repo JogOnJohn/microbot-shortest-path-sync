@@ -324,9 +324,12 @@ def semantic_map(category: str, table: Table) -> dict[tuple[str, ...], dict[str,
     result: dict[tuple[str, ...], dict[str, str]] = {}
     for row in table.rows:
         key = comparison_key(category, row)
+        canonical = canonical_row(row)
         if key in result:
-            raise SyncError(f"{category}: duplicate semantic row: {key}")
-        result[key] = canonical_row(row)
+            if result[key] == canonical:
+                continue
+            raise SyncError(f"{category}: conflicting duplicate semantic row: {key}")
+        result[key] = canonical
     return result
 
 
