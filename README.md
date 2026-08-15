@@ -96,6 +96,9 @@ collision endpoint ratchets, local-only resource validation, route tests, and fi
 See [docs/TRANSPORT_SCHEMA.md](docs/TRANSPORT_SCHEMA.md) for the currently supported Microbot
 transport contract, upstream column mapping, and execution-sensitive semantics.
 
+Maintainers should follow [docs/UPDATE_WORKFLOW.md](docs/UPDATE_WORKFLOW.md) for the complete pin,
+review, adoption, validation, branch-promotion, and handoff procedure.
+
 ## Override identity
 
 Overrides are matched using:

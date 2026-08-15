@@ -20,6 +20,33 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class TransportSyncTest(unittest.TestCase):
+    def test_semantic_diff_ignores_equivalent_interaction_serialization(self):
+        with tempfile.TemporaryDirectory() as temp:
+            baseline = Path(temp)
+            (baseline / "transports.tsv").write_text(
+                "# Origin\tDestination\tmenuOption menuTarget objectID\tDuration\n"
+                "1 2 0\t1 3 0\tOpen;Tree Gnome Gate;190\t9\n",
+                encoding="utf-8",
+            )
+            generated = {
+                "transports.tsv": Table(
+                    ["Origin", "Destination", "menuOption menuTarget objectID", "Duration", "Consumable"],
+                    [{
+                        "Origin": "1 2 0",
+                        "Destination": "1 3 0",
+                        "menuOption menuTarget objectID": "Open Tree Gnome Gate 190",
+                        "Duration": "9",
+                        "Consumable": "",
+                    }],
+                )
+            }
+
+            diff = semantic_diff(baseline, generated, {"transports.tsv": "TRANSPORT"})
+
+            self.assertEqual(0, diff["summary"]["added"])
+            self.assertEqual(0, diff["summary"]["removed"])
+            self.assertEqual(0, diff["summary"]["changed"])
+
     def test_payload_hash_is_filename_sorted_and_content_sensitive(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

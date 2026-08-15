@@ -66,6 +66,13 @@ def canonical_row(row: dict[str, str]) -> dict[str, str]:
         canonical = canonical_header(key)
         if canonical not in result or value.strip():
             result[canonical] = value.strip()
+    interaction_header = "menuOption menuTarget objectID"
+    interaction = result.get(interaction_header, "")
+    action, target, object_id = parse_action(interaction)
+    if object_id != "0":
+        # Microbot accepts both legacy Action;Target;123 and upstream Action Target 123.
+        # They are the same parser contract and must not produce thousands of false changes.
+        result[interaction_header] = f"{action};{target};{object_id}"
     return result
 
 
@@ -324,7 +331,11 @@ def semantic_map(category: str, table: Table) -> dict[tuple[str, ...], dict[str,
     result: dict[tuple[str, ...], dict[str, str]] = {}
     for row in table.rows:
         key = comparison_key(category, row)
-        canonical = canonical_row(row)
+        canonical = {
+            field: value
+            for field, value in canonical_row(row).items()
+            if value or field in IDENTITY_COLUMNS
+        }
         if key in result:
             if result[key] == canonical:
                 continue

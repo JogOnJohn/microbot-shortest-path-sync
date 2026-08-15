@@ -1,4 +1,18 @@
 # Category	Match interaction	Origin	Destination	menuOption menuTarget objectID	Currency	Skills	Items	Quests	Varbits	VarPlayers	Duration	Display info	Consumable	Wilderness level	isMembers	Operation	Reason
+transports.tsv		3012 3204 0	3011 3204 0	Open Door 2069												UPSERT	Preserve Microbot's Port Sarim back-room door transport.
+transports.tsv		3011 3204 0	3012 3204 0	Open Door 2069												UPSERT	Preserve Microbot's Port Sarim back-room door transport.
+transports.tsv		3303 3117 0	3304 3115 0	Go-through Shantay pass 4031	5 Coins						2					UPSERT	Allow the walker to buy a Shantay pass instead of taking a long detour.
+transports.tsv		3304 3117 0	3304 3115 0	Go-through Shantay pass 4031	5 Coins						2					UPSERT	Allow the walker to buy a Shantay pass instead of taking a long detour.
+transports.tsv		2529 2835 1	2532 2833 0	Climb Stairs 31735												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2532 2833 0	2529 2835 1	Climb Stairs 31735												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2550 2862 0	2547 2862 1	Climb-up Stairs 31733												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2547 2862 1	2550 2862 0	Climb-down Stairs 31734												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2555 2857 0	2555 2854 1	Climb-up Stairs 31733												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2555 2854 1	2555 2857 0	Climb-down Stairs 31734												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2561 2865 0	2561 2868 1	Climb-up Stairs 31733												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		2561 2868 1	2561 2865 0	Climb-down Stairs 31734												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
+transports.tsv		3026 3511 1	3025 3511 1	Open Sturdy door 2339												UPSERT	Preserve the live-verified Sturdy door transport near Taverley.
+transports.tsv		3025 3511 1	3026 3511 1	Open Sturdy door 2339												UPSERT	Preserve the live-verified Sturdy door transport near Taverley.
 transports.tsv		2461 3385 0	2461 3382 0	Open Gate 190							9					PATCH	Tree Gnome Stronghold gate animation and forced walk exceed the default 5 second landing wait.
 transports.tsv		2461 3382 0	2461 3385 0	Open Gate 190							9					PATCH	Tree Gnome Stronghold gate animation and forced walk exceed the default 5 second landing wait.
 transports.tsv		2462 3385 0	2461 3382 0	Open Gate 190							9					PATCH	Tree Gnome Stronghold gate animation and forced walk exceed the default 5 second landing wait.
