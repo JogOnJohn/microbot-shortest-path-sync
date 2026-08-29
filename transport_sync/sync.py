@@ -44,6 +44,10 @@ PARSER_COLUMNS = {
 }
 IDENTITY_COLUMNS = ("Origin", "Destination", "menuOption menuTarget objectID")
 OVERRIDE_METADATA = {"Category", "Match interaction", "Operation", "Reason"}
+ITEM_VARIATION_IDS = {
+    "AXE=1": "1351 1349 1353 1361 1355 1357 1359 6739 23673 23279 13241 20011",
+    "MACHETE=1": "975 6313 6315 6317",
+}
 
 
 class SyncError(RuntimeError):
@@ -111,6 +115,8 @@ def write_tsv(path: Path, table: Table) -> None:
         handle.write("# " + "\t".join(table.headers) + "\n")
         for row in table.rows:
             fields = [row.get(header, "") for header in table.headers]
+            while fields and not fields[-1]:
+                fields.pop()
             for field in fields:
                 if "\t" in field or "\n" in field or "\r" in field:
                     raise SyncError(f"Field not representable in TSV: {field!r} in {path}")
@@ -262,6 +268,38 @@ def load_overrides(path: Path) -> list[dict[str, str]]:
     return table.rows
 
 
+def normalize_runtime_item_requirements(tables: dict[str, Table]) -> None:
+    """Translate upstream item-variation syntax into Microbot's numeric runtime schema."""
+    for table in tables.values():
+        item_header = next(
+            (header for header in table.headers if canonical_header(header) == "Items"),
+            None,
+        )
+        if item_header is None:
+            continue
+
+        currency_header = next(
+            (header for header in table.headers if canonical_header(header) == "Currency"),
+            None,
+        )
+        additions: list[dict[str, str]] = []
+        for row in table.rows:
+            value = row.get(item_header, "").strip()
+            if value in ITEM_VARIATION_IDS:
+                row[item_header] = ITEM_VARIATION_IDS[value]
+                continue
+            if value == "SHANTAY_PASS=1|COINS=5":
+                row[item_header] = "1854"
+                currency_row = dict(row)
+                currency_row[item_header] = ""
+                if currency_header is None:
+                    table.headers.append("Currency")
+                    currency_header = "Currency"
+                currency_row[currency_header] = "5 Coins"
+                additions.append(currency_row)
+        table.rows.extend(additions)
+
+
 def apply_overrides(
     tables: dict[str, Table], overrides: list[dict[str, str]]
 ) -> list[dict[str, object]]:
@@ -314,6 +352,18 @@ def apply_overrides(
                     target[raw_header] = value.strip()
             if not matches:
                 table.rows.append(target)
+        elif operation == "APPEND":
+            if matches:
+                raise SyncError(f"APPEND override already exists: {key}")
+            target = {}
+            for raw_header, value in override.items():
+                if raw_header in OVERRIDE_METADATA:
+                    continue
+                if raw_header not in table.headers:
+                    table.headers.append(raw_header)
+                if value.strip() or raw_header in IDENTITY_COLUMNS:
+                    target[raw_header] = value.strip()
+            table.rows.append(target)
         else:
             raise SyncError(f"Unsupported override operation {operation}: {key}")
         applied.append(
@@ -583,6 +633,7 @@ def run(args: argparse.Namespace) -> int:
         tables[filename] = table
 
     upstream_parser_inert = list(parser_inert)
+    normalize_runtime_item_requirements(tables)
     overrides = apply_overrides(tables, load_overrides(SCRIPT_DIR / "local_overrides.tsv"))
     parser_inert = []
     for filename, table in tables.items():

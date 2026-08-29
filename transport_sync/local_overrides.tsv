@@ -1,8 +1,11 @@
 # Category	Match interaction	Origin	Destination	menuOption menuTarget objectID	Currency	Skills	Items	Quests	Varbits	VarPlayers	Duration	Display info	Consumable	Wilderness level	isMembers	Operation	Reason
 transports.tsv		3012 3204 0	3011 3204 0	Open Door 2069												UPSERT	Preserve Microbot's Port Sarim back-room door transport.
 transports.tsv		3011 3204 0	3012 3204 0	Open Door 2069												UPSERT	Preserve Microbot's Port Sarim back-room door transport.
-transports.tsv		3303 3117 0	3304 3115 0	Go-through Shantay pass 4031	5 Coins						2					UPSERT	Allow the walker to buy a Shantay pass instead of taking a long detour.
-transports.tsv		3304 3117 0	3304 3115 0	Go-through Shantay pass 4031	5 Coins						2					UPSERT	Allow the walker to buy a Shantay pass instead of taking a long detour.
+transports.tsv		2310 2919 0	2167 9308 0	Enter Cave 40736												APPEND	Preserve the Isle of Souls dungeon entrance required by the route corpus.
+transports.tsv		2167 9308 0	2310 2919 0	Exit Opening 40737												APPEND	Preserve the Isle of Souls dungeon exit required by the route corpus.
+agility_shortcuts.tsv		3228 3471 0	3228 3470 0	Climb Trellis 2149		35 Agility		Garden of Tranquillity			5					APPEND	Block and model both directions of the Varrock Palace trellis collision gap.
+transports.tsv		3228 3470 0	3228 3472 0	Climb Trellis 2149												DELETE	Remove the duplicate unrestricted trellis edge; the agility-shortcut rows model this obstacle.
+transports.tsv		3228 3472 0	3228 3470 0	Climb Trellis 2149												DELETE	Remove the duplicate unrestricted trellis edge; the agility-shortcut rows model this obstacle.
 transports.tsv		2529 2835 1	2532 2833 0	Climb Stairs 31735												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
 transports.tsv		2532 2833 0	2529 2835 1	Climb Stairs 31735												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.
 transports.tsv		2550 2862 0	2547 2862 1	Climb-up Stairs 31733												UPSERT	Preserve executable Corsair Cove stairs added by Microbot walker work.

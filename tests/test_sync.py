@@ -7,6 +7,7 @@ from transport_sync.sync import (
     Table,
     apply_overrides,
     identity,
+    normalize_runtime_item_requirements,
     parse_action,
     payload_sha256,
     read_tsv,
@@ -20,6 +21,30 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class TransportSyncTest(unittest.TestCase):
+    def test_normalizes_runtime_item_variations_and_splits_shantay_fare(self):
+        headers = [
+            "Origin", "Destination", "menuOption menuTarget objectID", "Items", "Currency"
+        ]
+        tables = {
+            "transports.tsv": Table(headers, [
+                {"Origin": "1 1 0", "Destination": "1 2 0",
+                 "menuOption menuTarget objectID": "Chop-down Jungle Bush 2892",
+                 "Items": "MACHETE=1", "Currency": ""},
+                {"Origin": "2 2 0", "Destination": "2 1 0",
+                 "menuOption menuTarget objectID": "Go-through Shantay pass 4031",
+                 "Items": "SHANTAY_PASS=1|COINS=5", "Currency": ""},
+            ])
+        }
+
+        normalize_runtime_item_requirements(tables)
+
+        rows = tables["transports.tsv"].rows
+        self.assertEqual("975 6313 6315 6317", rows[0]["Items"])
+        self.assertEqual(3, len(rows))
+        self.assertEqual("1854", rows[1]["Items"])
+        self.assertEqual("", rows[2]["Items"])
+        self.assertEqual("5 Coins", rows[2]["Currency"])
+
     def test_semantic_diff_ignores_equivalent_interaction_serialization(self):
         with tempfile.TemporaryDirectory() as temp:
             baseline = Path(temp)
@@ -125,6 +150,18 @@ class TransportSyncTest(unittest.TestCase):
             output = Path(temp_dir) / "out.tsv"
             write_tsv(output, table)
             self.assertEqual(content, output.read_text(encoding="utf-8"))
+
+    def test_write_omits_trailing_empty_columns(self):
+        table = Table(["Origin", "Destination", "Duration"], [{
+            "Origin": "1 2 0", "Destination": "3 4 0", "Duration": ""
+        }])
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "out.tsv"
+            write_tsv(output, table)
+            self.assertEqual(
+                "# Origin\tDestination\tDuration\n1 2 0\t3 4 0\n",
+                output.read_text(encoding="utf-8"),
+            )
 
     def test_write_rejects_unrepresentable_fields(self):
         table = Table(["Origin"], [{"Origin": "tab\tinside"}])
