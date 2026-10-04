@@ -285,6 +285,14 @@ def normalize_runtime_item_requirements(tables: dict[str, Table]) -> None:
         additions: list[dict[str, str]] = []
         for row in table.rows:
             value = row.get(item_header, "").strip()
+            fare = re.fullmatch(r"COINS=(\d+)", value)
+            if fare:
+                if currency_header is None:
+                    table.headers.append("Currency")
+                    currency_header = "Currency"
+                row[currency_header] = f"{fare.group(1)} Coins"
+                row[item_header] = ""
+                continue
             if value in ITEM_VARIATION_IDS:
                 row[item_header] = ITEM_VARIATION_IDS[value]
                 continue

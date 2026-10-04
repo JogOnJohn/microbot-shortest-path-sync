@@ -21,6 +21,13 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class TransportSyncTest(unittest.TestCase):
+    def test_coin_fares_keep_quantity_and_leave_non_coin_requirements_intact(self):
+        table = Table(["Items"], [{"Items": "COINS=875"}, {"Items": "ECTO_TOKEN=25|UNLOCK_DRAGONTOOTH=1"}])
+        normalize_runtime_item_requirements({"boats.tsv": table})
+        self.assertEqual("875 Coins", table.rows[0]["Currency"])
+        self.assertEqual("", table.rows[0]["Items"])
+        self.assertEqual("ECTO_TOKEN=25|UNLOCK_DRAGONTOOTH=1", table.rows[1]["Items"])
+
     def test_normalizes_runtime_item_variations_and_splits_shantay_fare(self):
         headers = [
             "Origin", "Destination", "menuOption menuTarget objectID", "Items", "Currency"

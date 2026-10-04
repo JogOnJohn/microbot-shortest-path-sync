@@ -8,7 +8,7 @@ and the generated transport payload—not any one of those in isolation.
 ## Repositories and branches
 
 - Public converter: `JogOnJohn/microbot-shortest-path-sync`, branch `main`.
-- Playable Microbot spike: `JogOnJohn/Microbot`, branch `spike/shortest-path-upstream`.
+- Playable Microbot: `JogOnJohn/Microbot`, branch `playable/shortest-path`.
 - Data-sync Microbot spike: `JogOnJohn/Microbot`, branch `spike/shortest-path-data-sync`.
 - Microbot-specific behavior fixes: `transport_sync/local_overrides.tsv` in this repository and
   the matching vendored `scripts/transport_sync/local_overrides.tsv` in Microbot.
