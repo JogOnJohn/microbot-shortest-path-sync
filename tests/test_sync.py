@@ -21,6 +21,11 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
 class TransportSyncTest(unittest.TestCase):
+    def test_combined_tool_requirements_preserve_both_groups(self):
+        row = {"Items": "AXE=1&MACHETE=1"}
+        normalize_runtime_item_requirements({"transports.tsv": Table(["Items"], [row])})
+        self.assertEqual("AXE=1&MACHETE=1", row["Items"])
+
     def test_coin_fares_keep_quantity_and_leave_non_coin_requirements_intact(self):
         table = Table(["Items"], [{"Items": "COINS=875"}, {"Items": "ECTO_TOKEN=25|UNLOCK_DRAGONTOOTH=1"}])
         normalize_runtime_item_requirements({"boats.tsv": table})

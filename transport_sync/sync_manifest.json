@@ -1,9 +1,9 @@
 {
   "tooling_repository": "https://github.com/osrs-pathfinding/shortest-path-tooling.git",
-  "tooling_commit": "76027cf82ee96c76db956cc5314b33a40e5e2dab",
+  "tooling_commit": "be0fdca3fdc029684cf19865510c418fdba5c11e",
   "data_repository": "https://github.com/Skretzo/shortest-path.git",
-  "data_commit": "18983976962d5f0d28c4a232ce0da7b44b4fbadd",
-  "collision_map_sha256": "c258238954e84e80cd9403fbd1acd78aef8cee81955cbd2446f36a3c70b0118b",
+  "data_commit": "3a55ac9be3f7481c7cac30d86255789aabb2b3ca",
+  "collision_map_sha256": "b630dcb51c05b390e46ccf92c28e96c2eec293e27be9781f57d6d7ec14e62b01",
   "categories": {
     "agility_shortcuts.tsv": "AGILITY_SHORTCUT",
     "boats.tsv": "BOAT",
